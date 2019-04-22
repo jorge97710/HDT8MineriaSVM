@@ -16,10 +16,11 @@ abline(modeloLineal)
 
 datos$AdoptionSpeed <- as.factor(datos$AdoptionSpeed)
 
-
-modeloSVM<-svm(AdoptionSpeed~., data=train, cost=2^1, gamma=2^-1, type = 'C')
+#debido a lo pesado que es se recurre al resultado
+#modeloSVM<-svm(AdoptionSpeed~., data=train, cost=2^1, gamma=2^-1, type = 'C')
+modeloSVM<-load("C:/Users/Ana Lucia Diaz Leppe/Documents/Hojadetrabajo8/Ana/modeloSVM.RData") 
+as.factor(modeloSVM)
+as.numeric(modeloSVM)
 prediccion<-predict(modeloSVM,newdata=test)
-
-
 confusionMatrix(test$AdoptionSpeed,prediccion)
 
