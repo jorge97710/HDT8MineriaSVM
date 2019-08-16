@@ -44,4 +44,71 @@ prediccion<-predict(modeloSVM,newdata=test)
 
 confusionMatrix(test$AdoptionSpeed,prediccion)
 
+install.packages("rela")
+install.packages("psych")
+install.packages("FactoMineR")
+install.packages("corrplot")
+library(rela)
+library(psych)
+library(FactoMineR)
 
+library(corrplot)
+
+datos<-read.csv("filasennumeros.csv",stringsAsFactors = F)
+
+#Se debe analizar si se puede usar el análisis factorial 
+#para formar las combinaciones lineales de las variables
+pafDatos<-paf(as.matrix(datos[,1:38]))
+pafDatos$KMO 
+pafDatos$Bartlett 
+summary(pafDatos)
+
+#Pero hay que ver el nivel de significación de la prueba
+cortest.bartlett(datos[,-1])
+
+
+#se muestra la matriz de correlación
+cor(datos[,-1],use = "pairwise.complete.obs")
+
+
+
+#Esta función normaliza los datos de una vez
+compPrinc<-prcomp(datos[,2:8], scale = T)
+compPrinc
+
+
+summary(compPrinc)
+
+compPrincPCA<-PCA(datos[,-1],ncp=ncol(datos[,-1]), scale.unit = T)
+
+summary(compPrincPCA)
+
+#Se obtiene el scree plot de las componentes principales.
+# Como se ve hacen falta 4 de las 7 componentes para explicar m�s del 80% de la variabilidad
+fviz_eig(compPrinc, addlabels = TRUE, ylim = c(0, 80))
+
+# En la siguiente gráfica se ilustra la calidad de la representación de los componentes en las dos primeras dimensiones.
+fviz_pca_var(compPrinc, col.var = "cos2",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             repel = TRUE # Avoid text overlapping
+)
+
+pafdatos <- paf(datos[,1:4])
+pafdatos$KMO #La adecuaci�n muestral no es buena
+
+datosPCA <- PCA(datos[,1:4])
+summary(datosPCA)
+
+
+#Scree Plot
+fviz_eig(datosPCA, addlabels = TRUE, ylim = c(0, 80))
+#Representaci�n de las variables en cada componente
+fviz_pca_var(datosPCA, col.var = "cos2",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             repel = TRUE # Avoid text overlapping
+)
+
+#Representaci�n de cada variable en cada componente
+var<-get_pca_var(datosPCA)
+corrplot(var$cos2, is.corr = F)
+#Seg�n la representaci�n de las variables en las componentes se podr�a incluir en la dimensi�n 1 pero la interpretabilidad del componente principal ser�a m�s complicada.
