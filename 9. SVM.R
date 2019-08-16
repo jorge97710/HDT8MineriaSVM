@@ -111,3 +111,4 @@ fviz_pca_var(datosPCA, col.var = "cos2",
 #Representaci�n de cada variable en cada componente
 var<-get_pca_var(datosPCA)
 corrplot(var$cos2, is.corr = F)
+
