@@ -112,3 +112,48 @@ fviz_pca_var(datosPCA, col.var = "cos2",
 var<-get_pca_var(datosPCA)
 corrplot(var$cos2, is.corr = F)
 
+#fix cluster
+library(cluster) #Para calcular la silueta
+library(e1071)#para cmeans
+library(mclust) #mixtures of gaussians
+library(fpc) #para hacer el plotcluster
+library(NbClust) #Para determinar el n�mero de clusters �ptimo
+library(factoextra) #Para hacer gr�ficos bonitos de clustering
+
+#Clustering jerárquico
+hc<-hclust(dist(train[,1:78])) #Genera el clustering jerárquico de los datos
+plot(hc) #Genera el dendograma
+rect.hclust(hc,k=2) 
+groups<-cutree(hc,k=2)
+datos$gruposHC<-groups
+
+
+g1HC<-datos[datos$gruposHC==1,]
+g2HC<-datos[datos$gruposHC==2,]
+g3HC<-datos[datos$gruposHC==3,]
+
+
+#Método de la silueta para clustering jerárquico
+silch<-silhouette(groups,dist(train[,1:78]))
+mean(silch[,2]) 
+
+#Método de Ward para determinar el número correcto de clusteres con k-medias
+#Para saber cual es el mejor numero de clusters
+wss <- (nrow(datos[,1:10])-1)*sum(apply(datos[,1:10],2,var))
+
+for (i in 1:10) 
+  wss[i] <- sum(kmeans(datos[,1:10], centers=i)$withinss)
+
+plot(1:10, wss, type="b", xlab="Number of Clusters",  ylab="Within groups sum of squares")
+
+#Paquete para saber el mejor n�mero de clusters
+nb <- NbClust(datos[,1:10], distance = "euclidean", min.nc = 2,max.nc = 10, method = "complete", index ="all")
+
+#Visualizaci�n de los clusters con factoextra
+#Visualizaci�n de las k-medias
+fviz_cluster(km, data = train[,1:78],geom = "point", ellipse.type = "norm")
+
+#Visualizaci�n de cluster jer�rquico
+hc.cut<-hcut(train[,1:78], k=2, hc_method = "complete")
+fviz_dend(hc.cut, show_labels = FALSE, rect = TRUE)
+fviz_cluster(hc.cut, ellipse.type = "convex")
